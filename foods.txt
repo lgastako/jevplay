@@ -1,0 +1,22 @@
+apple
+tomato
+grapes
+banana
+hamburger
+steak
+eggs
+french fries
+potatoes
+yams
+squash
+cheese
+onions
+peppers
+habanero
+jalepeno
+tacos
+ramen
+rice
+milk
+water
+

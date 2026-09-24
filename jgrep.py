@@ -1,11 +1,8 @@
 from pathlib import Path
 from typing import Annotated
 
-import laya
 import typer
-
-# from laya import Router
-from lclient import remote
+from typesafe_sdk import Noul, TypeSafeClient
 
 DEFAULT_CUT_OFF = 0.75
 
@@ -30,16 +27,15 @@ def main(
         ),
     ] = False,
 ):
-    router = None
+    with TypeSafeClient() as client:
+        for path in paths:
+            grep(client, path, cut_off, q, show_noul=show_noul, all_results=all_results)
 
-    for path in paths:
-        grep(router, path, cut_off, q, show_noul=show_noul, all_results=all_results)
 
-
-def grep(router, path, cut_off, q, show_noul=False, all_results=False):
+def grep(client, path, cut_off, q, show_noul=False, all_results=False):
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            n, matched = check_line(router, q, line, cut_off=cut_off)
+            n, matched = check_line(client, q, line, cut_off=cut_off)
             if all_results:
                 marker = typer.style("Y", fg="green") if matched else typer.style("N", fg="red")
                 typer.echo(f"{n:.4f} [{marker}]: {line}", nl=False)
@@ -49,22 +45,20 @@ def grep(router, path, cut_off, q, show_noul=False, all_results=False):
                 print(line, end="")
 
 
-def check_line(router, q, line, cut_off=DEFAULT_CUT_OFF):
-    # res = router.predict(
-    res = remote(
-        {
+def check_line(client, q, line, cut_off=DEFAULT_CUT_OFF):
+    res = client.system_one(
+        state={
             "context": "semantic-grep",
             "semantic_pattern": q,
             "current_line": line
         },
-        {
-            "semgrep": {
-                "type": "noul",
-                "instructions": "Does the 'current_line' match the semantic description from 'semantic_pattern'?"
-            }
+        questions={
+            "semgrep": Noul(
+                instructions="Does the 'current_line' match the semantic description from 'semantic_pattern'?"
+            )
         })
 
-    n = res["answers"]["semgrep"]["noul"]
+    n = res.answers["semgrep"].noul
     return n, n >= cut_off
 
 

@@ -482,6 +482,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "ipdb" },
     { name = "laya" },
+    { name = "typer" },
     { name = "typesafe-sdk" },
     { name = "zmq" },
 ]
@@ -490,6 +491,7 @@ dependencies = [
 requires-dist = [
     { name = "ipdb", specifier = ">=0.13.13" },
     { name = "laya", specifier = ">=0.3.6" },
+    { name = "typer", specifier = ">=0.27.2" },
     { name = "typesafe-sdk", specifier = ">=0.7.1" },
     { name = "zmq", specifier = ">=0.0.0" },
 ]
