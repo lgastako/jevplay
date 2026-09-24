@@ -38,15 +38,34 @@ def loop(router):
         once(router, o)
 
 
+# Example response:
+# {'model': 'laya-rl-agent', 'answers': {'happiness': {'type': 'choice', 'choice': 'not', 'probabilities': {'very': 0.2869, 'somewhat': 0.1618, 'not_very': 0.1927, 'not': 0.3586}, 'confidence': 0.0348, 'action': {'act_probability': 1.0}}}, 'usage': {'input_tokens': 54, 'output_tokens': 0}, 'routing': {'model': 'english', 'repo': 'convaiinnovations/laya', 'reason': 'English Latin text', 'detection': {'script': 'latin', 'script_profile': {'latin': 1.0}, 'language': None, 'is_english': True, 'language_undecided': True, 'diacritic_rate': 0.0, 'non_latin_fraction': 0.0}, 'workflow': None}}
+
+BAR_WIDTH = 30
+
+
 def once(router, o):
     state = {
         "user_input": o
     }
     res = router.predict(state, QUESTIONS)
+    print_chart(res)
 
-    # Example response:
-    {'model': 'laya-rl-agent', 'answers': {'happiness': {'type': 'choice', 'choice': 'not', 'probabilities': {'very': 0.2869, 'somewhat': 0.1618, 'not_very': 0.1927, 'not': 0.3586}, 'confidence': 0.0348, 'action': {'act_probability': 1.0}}}, 'usage': {'input_tokens': 54, 'output_tokens': 0}, 'routing': {'model': 'english', 'repo': 'convaiinnovations/laya', 'reason': 'English Latin text', 'detection': {'script': 'latin', 'script_profile': {'latin': 1.0}, 'language': None, 'is_english': True, 'language_undecided': True, 'diacritic_rate': 0.0, 'non_latin_fraction': 0.0}, 'workflow': None}}
-    print(res)
+
+def print_chart(res):
+    for question, answer in res.get("answers", {}).items():
+        probs = answer.get("probabilities")
+        if not probs:
+            continue
+
+        chosen = answer.get("choice")
+        label_width = max(len(label) for label in probs)
+
+        print(f"\n{question}:")
+        for label, weight in sorted(probs.items(), key=lambda kv: -kv[1]):
+            bar = "#" * round(weight * BAR_WIDTH)
+            marker = " <- chosen" if label == chosen else ""
+            print(f"  {label:<{label_width}} | {bar:<{BAR_WIDTH}} {weight * 100:5.1f}%{marker}")
 
 
 
